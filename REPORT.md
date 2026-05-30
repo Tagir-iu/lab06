@@ -21,3 +21,5 @@
 
 
 ## added DockerFile ant etc.
+
+## add CPack configuration and versioning
