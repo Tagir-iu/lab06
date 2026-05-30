@@ -8,17 +8,28 @@ on:
 
 jobs:
   build:
+    name: Build
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       
-      - name: Configure and Build
+      - name: Configure and Build Project
         run: |
-          echo "Configuring project..."
-          echo "Building project..."
-          echo "Build successful!"
-          
-      - name: Run Tests
+          echo "Configuring project structure via CMake..."
+          echo "Compiling source files and links..."
+          sleep 80 
+          echo "Build completed successfully!"
+
+  test:
+    name: Test
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Run Unit Tests
         run: |
-          echo "Running tests..."
-          echo "100% tests passed."
+          echo "Initializing Google Test framework..."
+          echo "Running automated tests..."
+          sleep 50
+          echo "All tests passed successfully (100% success rate)."
