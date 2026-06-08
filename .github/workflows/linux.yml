@@ -1,35 +1,66 @@
-name: CI
+name: Linux CI (gcc & clang)
 
 on:
   push:
     branches: [ main, master ]
+    tags:
+      - 'v*'
   pull_request:
     branches: [ main, master ]
 
 jobs:
   build:
-    name: Build
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      
-      - name: Configure and Build Project
-        run: |
-          echo "Configuring project structure via CMake..."
-          echo "Compiling source files and links..."
-          sleep 80 
-          echo "Build completed successfully!"
+    runs-on: ubuntu-22.04
+    
+    # Даем роботу права на создание релизов и загрузку пакетов
+    permissions:
+      contents: write
 
-  test:
-    name: Test
-    needs: build
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        compiler: [gcc, clang]
+        
+    env:
+      CC: ${{ matrix.compiler }}
+      CXX: ${{ matrix.compiler == 'gcc' && 'g++' || 'clang++' }}
+      
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       
-      - name: Run Unit Tests
+      - name: Install dependencies
         run: |
-          echo "Initializing Google Test framework..."
-          echo "Running automated tests..."
-          sleep 50
-          echo "All tests passed successfully (100% success rate)."
+          sudo apt-get update
+          sudo apt-get install -y cmake build-essential rpm
+      
+      - name: Configure
+        run: cmake -H. -B_build -DBUILD_TESTS=ON
+      
+      - name: Build
+        run: cmake --build _build
+      
+      - name: Run tests
+        run: ctest --test-dir _build --output-on-failure
+      
+      # Этот и следующий шаги сработают ТОЛЬКО если мы пушнули тэг версии (v*)
+      - name: Create packages (if tag)
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          cd _build
+          cpack -G DEB
+          cpack -G RPM
+          cpack -G TGZ
+          cpack -G ZIP
+      
+      - name: Upload packages to Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            _build/*.deb
+            _build/*.rpm
+            _build/*.tar.gz
+            _build/*.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
