@@ -178,3 +178,28 @@ cd ..
 mkdir artifacts
 sleep 20s && gnome-screenshot --file artifacts/screenshot.png
 ```
+## 10. Выполнение задания Homework (Интеграция приложения Solver)
+
+По условию Homework, в процесс сборки проекта было интегрировано приложение `solver` из лабораторной работы №3. Для обеспечения корректной сборки и упаковки были выполнены следующие действия:
+
+1.  **Обновление корневого файла `CMakeLists.txt`:**
+    * Добавлены директивы `add_subdirectory(solver_lib)` и `add_subdirectory(solver)` для включения соответствующих модулей в процесс сборки.
+    * Добавлена директива инсталляции для CPack, чтобы исполняемые файлы попадали в конечные пакеты:
+        ```cmake
+        install(TARGETS solver hello_world formatter_ex RUNTIME DESTINATION bin)
+        ```
+
+2.  **Настройка `solver/CMakeLists.txt`:**
+    * Настроены пути поиска заголовочных файлов через `target_include_directories`, что позволило устранить ошибки компиляции, связанные с поиском зависимостей:
+        ```cmake
+        target_include_directories(solver PRIVATE 
+            ${CMAKE_CURRENT_SOURCE_DIR}/../formatter_lib
+            ${CMAKE_CURRENT_SOURCE_DIR}/../formatter_ex
+            ${CMAKE_CURRENT_SOURCE_DIR}/../solver_lib
+        )
+        target_link_libraries(solver PRIVATE solver_lib formatter_ex formatter)
+        ```
+
+3.  **Результат:**
+    * Настроенный GitHub Actions теперь автоматически собирает приложение `solver` и упаковывает его в итоговые `.deb` и `.rpm` пакеты при создании релизного тега.
+    * Финальные пакеты успешно прикрепляются к релизам в GitHub (см. раздел Releases в репозитории).
