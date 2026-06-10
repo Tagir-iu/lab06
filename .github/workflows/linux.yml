@@ -8,7 +8,7 @@ on:
   pull_request:
     branches: [ main ]
 
-# Явно выдаем права на запись в релизы
+# Обязательно для создания релизов
 permissions:
   contents: write
 
@@ -53,7 +53,6 @@ jobs:
         cd _build
         cpack -G "DEB;RPM;TGZ;ZIP"
 
-    # Шаг публикации в релиз (выполняется только для тегов и только одним компилятором)
     - name: Upload packages to Release
       if: startsWith(github.ref, 'refs/tags/') && matrix.compiler == 'gcc'
       uses: softprops/action-gh-release@v1
