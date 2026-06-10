@@ -199,6 +199,3 @@ cd ..
         target_link_libraries(solver PRIVATE solver_lib formatter_ex formatter)
         ```
 
-3.  **Результат:**
-    * Настроенный GitHub Actions теперь автоматически собирает приложение `solver` и упаковывает его в итоговые `.deb` и `.rpm` пакеты при создании релизного тега.
-    * Финальные пакеты успешно прикрепляются к релизам в GitHub (см. раздел Releases в репозитории).
