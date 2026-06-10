@@ -5,8 +5,6 @@ on:
     branches: [ main ]
     tags:
       - 'v*'
-  pull_request:
-    branches: [ main ]
 
 permissions:
   contents: write
@@ -26,7 +24,7 @@ jobs:
             cc: clang
 
     steps:
-    - name: Checkout
+    - name: Checkout code
       uses: actions/checkout@v4
 
     - name: Install dependencies
@@ -52,7 +50,7 @@ jobs:
         cd _build
         cpack -G "DEB;RPM;TGZ;ZIP"
 
-    - name: Upload packages to Release
+    - name: Upload to Release
       if: startsWith(github.ref, 'refs/tags/') && matrix.compiler == 'gcc'
       uses: softprops/action-gh-release@v1
       with:
@@ -61,5 +59,6 @@ jobs:
           _build/*.rpm
           _build/*.tar.gz
           _build/*.zip
+        generate_release_notes: true
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
