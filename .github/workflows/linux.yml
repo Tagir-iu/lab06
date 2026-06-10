@@ -24,7 +24,7 @@ jobs:
             cc: clang
 
     steps:
-    - name: Checkout code
+    - name: Checkout
       uses: actions/checkout@v4
 
     - name: Install dependencies
